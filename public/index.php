@@ -1,3 +1,5 @@
 <?php
 
-echo "Hello, World";
+$name = $_GET["name"];
+
+echo "Hello, $name";
