@@ -4,6 +4,8 @@ namespace App;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
@@ -27,6 +29,7 @@ function is_leap_year($year = null): bool
     if ($year === null) {
         $year = date('Y');
     }
+    var_dump($year);
     return 0 === $year % 400 || (0 === $year % 4 && 0 !== $year % 100);
 }
 
@@ -46,12 +49,7 @@ $routeCollection->add("bye", new Route("/bye", [
 
 $routeCollection->add("leapYear", new Route("/leap_year/{year}", [
     "year" => null,
-    "_controller" => function (Request $request) {
-        if (is_leap_year($request->attributes->get("year"))) {
-            return new Response("Да, это високосный год");
-        }
-        return new Response("Нет, этот год невисокосный");
-    }
+    "_controller" => "App\\LeapYearController::index",
 ]));
 
 $context = new RequestContext();
@@ -59,9 +57,14 @@ $context->fromRequest($request);
 
 $matcher = new UrlMatcher($routeCollection, $context);
 
+$controllerResolver = new ControllerResolver();
+$argumentResolver = new ArgumentResolver();
+
 try {
     $request->attributes->add($matcher->match($request->getPathInfo()));
-    $response = call_user_func($request->attributes->get('_controller'), $request);
+    $controller = $controllerResolver->getController($request);
+    $arguments = $argumentResolver->getArguments($request, $controller);
+    $response = call_user_func($controller, $arguments);
 } catch (ResourceNotFoundException $exception) {
     $response = new Response("Страница не  найдена", 404);
 } catch (\Exception $exception) {
