@@ -33,7 +33,6 @@ try {
 } catch (ResourceNotFoundException $exception) {
     $response = new Response("Страница не  найдена", 404);
 } catch (\Exception $exception) {
-    echo $exception->getMessage();
     $response = new Response("Ошибка сервера", 500);
 }
 $response->send();
