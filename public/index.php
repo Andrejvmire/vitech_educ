@@ -15,7 +15,6 @@ require_once "../vendor/autoload.php";
 ini_set("display_errors", 1);
 
 $request = Request::createFromGlobals();
-$response = new Response();
 $routeCollection = new RouteCollection();
 $routeCollection->add("hello", new Route('/hello/{name}', ["name" => "World"]));
 $routeCollection->add("bye", new Route("/bye"));
@@ -27,11 +26,12 @@ $matcher = new UrlMatcher($routeCollection, $context);
 try {
     extract($matcher->match($request->getPathInfo()), EXTR_SKIP);
     ob_start();
-    require sprintf("./pages/%s.php", $_route);
+    include sprintf('./pages/%s.php', $_route);
+
+    $response = new Response(ob_get_clean());
 } catch (ResourceNotFoundException $exception) {
-    $response->setStatusCode(404);
-    $response->setContent("Страница не  найдена");
+    $response = new Response("Страница не  найдена", 404);
 } catch (\Exception $exception) {
-    $response->setStatusCode(500);
+    $response = new Response("Ошибка сервера", 500);
 }
 $response->send();
