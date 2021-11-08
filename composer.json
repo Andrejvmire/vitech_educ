@@ -1,8 +1,6 @@
 {
     "autoload": {
-        "psr-4": {
-            "App\\": "public/"
-        }
+        "psr-4": { "": "src/" }
     },
     "require": {
         "symfony/http-kernel": "5.3.*",

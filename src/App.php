@@ -1,5 +1,4 @@
 <?php
-namespace App;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,7 +27,7 @@ $routeCollection->add("bye", new Route("/bye", [
 
 $routeCollection->add("leapYear", new Route("/leap_year/{year}", [
     "year" => null,
-    "_controller" => "App\\LeapYearController::index",
+    "_controller" => 'Calendar\Controller\LeapYearController::indexAction',
 ]));
 
 return $routeCollection;

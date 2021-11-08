@@ -1,38 +1,25 @@
 <?php
-
-namespace App;
+require_once __DIR__.'/../vendor/autoload.php';
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Symfony\Component\Routing\RequestContext;
-
-require_once "../vendor/autoload.php";
+use Symfony\Component\Routing;
+use Symfony\Component\HttpKernel;
 
 ini_set("display_errors", 1);
 
 $request = Request::createFromGlobals();
-$routes = include './App.php';
+$routes = include __DIR__.'/../src/App.php';
 
-$context = new RequestContext();
-$context->fromRequest($request);
-
-$matcher = new UrlMatcher($routes, $context);
+$context = new Routing\RequestContext();
+$matcher = new Routing\Matcher\UrlMatcher($routes, $context);
 
 $controllerResolver = new ControllerResolver();
 $argumentResolver = new ArgumentResolver();
 
-try {
-    $request->attributes->add($matcher->match($request->getPathInfo()));
-    $controller = $controllerResolver->getController($request);
-    $arguments = $argumentResolver->getArguments($request, $controller);
-    $response = call_user_func($controller, $arguments);
-} catch (ResourceNotFoundException $exception) {
-    $response = new Response("Страница не  найдена", 404);
-} catch (\Exception $exception) {
-    $response = new Response("Ошибка сервера", 500);
-}
+$framework = new Simplex\Framework($matcher, $controllerResolver, $argumentResolver);
+$response = $framework->handle($request);
+
 $response->send();
